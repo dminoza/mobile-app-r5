@@ -1,20 +1,71 @@
-import { useState } from 'react';
-import { View } from 'react-native';
-import InputField from '../../../components/InputField';
-import { UniversalStyle } from '../../../styles';
+import axios from '../../../plugins/axios';
+import { useState } from "react";
+import { Button, TextInput, View } from "react-native";
+import { useNavigation } from '@react-navigation/native';
 
-export default function Registration({navigation}) {
-    const [firstName, setFirstName] = useState('')
-    const [lastName, setLastName] = useState('')
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
-    const [confirm, setConfirm] = useState('')
-
+export default function Registration() {
+    const navigation = useNavigation();
+    const [data, setData] = useState({
+        username: '',
+        first_name: '',
+        last_name: '',
+        email: '',
+        password1: '',
+        password2: ''
+    })
     return (
-        <View style={UniversalStyle.container}>
-            <InputField label="First Name" value={firstName} onChangeText={setFirstName} />
-            <InputField label="Last Name" value={lastName} onChangeText={setLastName} />
-            <InputField label="Email" value={email} onChangeText={setEmail} />
+        <View>
+            <TextInput placeholder="First Name" value={data.first_name} onChangeText={(text) => {
+                setData({
+                    ...data,
+                    first_name: text
+                });
+            }} />
+            <TextInput placeholder="Last Name" value={data.last_name} onChangeText={(text) => {
+                setData({
+                    ...data,
+                    last_name: text
+                })
+            }} />
+            <TextInput placeholder="Username" value={data.username} onChangeText={(text) => {
+                setData({
+                    ...data,
+                    username: text
+                });
+            }} />
+            <TextInput placeholder="Email Address" value={data.email} onChangeText={(text) => {
+                setData({
+                    ...data,
+                    email: text
+                })
+            }} />
+            <TextInput placeholder="Passowrd" value={data.password1} onChangeText={(text) => {
+                setData({
+                    ...data,
+                    password1: text
+                })
+            }} />
+            <TextInput placeholder="Confirm" value={data.password2} onChangeText={(text) => {
+                setData({
+                    ...data,
+                    password2: text
+                })
+            }} />
+            <Button title="Submit" onPress={() => {
+                axios.post('rest_auth/registration', data).then(response => {
+                    navigation.navigate('Dashboard');
+                    setData({
+                        username: '',
+                        first_name: '',
+                        last_name: '',
+                        email: '',
+                        password1: '',
+                        password2: ''
+                    })
+                }).catch(error => {
+                    console.log(error.response.data);
+                })
+            }} />
         </View>
     )
 }
