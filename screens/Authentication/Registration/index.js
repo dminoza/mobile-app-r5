@@ -2,9 +2,13 @@ import axios from '../../../plugins/axios';
 import { useState } from "react";
 import { Button, TextInput, View } from "react-native";
 import { useNavigation } from '@react-navigation/native';
+import { useDispatch } from 'react-redux';
+import { mutateUser } from '../authSlice';
+
 
 export default function Registration() {
     const navigation = useNavigation();
+    const dispatch = useDispatch()
     const [data, setData] = useState({
         username: '',
         first_name: '',
@@ -52,19 +56,24 @@ export default function Registration() {
                 })
             }} />
             <Button title="Submit" onPress={() => {
-                axios.post('rest_auth/registration', data).then(response => {
-                    navigation.navigate('Dashboard');
-                    setData({
-                        username: '',
-                        first_name: '',
-                        last_name: '',
-                        email: '',
-                        password1: '',
-                        password2: ''
-                    })
-                }).catch(error => {
-                    console.log(error.response.data);
-                })
+                dispatch(mutateUser({
+                    firstName: data.first_name,
+                    lastName: data.last_name,
+                    email: data.email
+                }));
+                // axios.post('rest_auth/registration', data).then(response => {
+                //     navigation.navigate('Dashboard');
+                //     setData({
+                //         username: '',
+                //         first_name: '',
+                //         last_name: '',
+                //         email: '',
+                //         password1: '',
+                //         password2: ''
+                //     })
+                // }).catch(error => {
+                //     console.log(error.response.data);
+                // })
             }} />
         </View>
     )
