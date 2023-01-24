@@ -5,6 +5,22 @@ import { useDispatch, useSelector } from "react-redux";
 // import axios from '../../../plugins/axios';
 import axios from '../../../plugins/axios';
 import { mutateToken } from '../authSlice';
+import { GLView } from "expo-gl";
+import { Renderer } from "expo-three";
+import {
+    AmbientLight,
+    SphereGeometry,
+    Fog,
+    GridHelper,
+    Mesh,
+    MeshStandardMaterial,
+    PerspectiveCamera,
+    PointLight,
+    Scene,
+    SpotLight,
+  } from 'three';
+
+import DeviceCard from "../components/deviceCard";
 
 
 export default function Login () {
@@ -14,35 +30,69 @@ export default function Login () {
     const [warning, setWarning] = useState('');
     const dispatch = useDispatch();
     const token = useSelector((state) => state.auth.token);
+    const myDevices = useSelector((state) => state.devices.myDevice)
+
+    const [devices, setDevices] = useState([
+      {
+        noOfDevices: 1,
+        noOfHours: 2
+      },
+      {
+        noOfDevices: 2,
+        noOfHours: 1
+      }
+    ])
     return (
-        <View>
-            <Text>{ warning }</Text>
-            <Text>{ token }</Text>
-            <TextInput placeholder="Email Address" value={email} onChangeText={setEmail} />
-            <Text>Must be email</Text>
-            <TextInput placeholder="Password" value={password} onChangeText={setPassword} />
-            <Button title="Login" onPress={() => {
-                console.log({
-                    email: email,
-                    password: password
-                })
-                axios.post('rest_auth/login/', {
-                    "email" : email,
-                    "password": password
-                }).then(response => {
-                    dispatch(mutateToken('aa36a95068e9b600510ec7fd2afead4ab5c5fcf3'))
-                    navigation.navigate('Dashboard')
-                }).catch(error => {
-                    setWarning('dili mao imong credentials!');
-                    dispatch(mutateToken('aa36a95068e9b600510ec7fd2afead4ab5c5fcf3'))
-                    navigation.navigate('Dashboard')
-                });
-            }} />
-            <Text onPress={() => {
-                navigation.navigate('Register');
-            }}>
-                Create Account?
-            </Text>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          {
+            (myDevices != undefined) ? myDevices.map(obj => <DeviceCard noOfDevices={obj.noOfDevices} noOfHours={obj.noOfHours} />) : null
+          }
+          <Button onPress={() => {
+            navigation.navigate('LainNgaScreen');
+          }} title="lain nga screen"></Button>
         </View>
     )
 }
+
+function onContextCreate(gl) {
+    gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+    gl.clearColor(0, 1, 1, 1);
+  
+    // Create vertex shader (shape & position)
+    const vert = gl.createShader(gl.VERTEX_SHADER);
+    gl.shaderSource(
+      vert,
+      `
+      void main(void) {
+        gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
+        gl_PointSize = 150.0;
+      }
+    `
+    );
+    gl.compileShader(vert);
+  
+    // Create fragment shader (color)
+    const frag = gl.createShader(gl.FRAGMENT_SHADER);
+    gl.shaderSource(
+      frag,
+      `
+      void main(void) {
+        gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+      }
+    `
+    );
+    gl.compileShader(frag);
+  
+    // Link together into a program
+    const program = gl.createProgram();
+    gl.attachShader(program, vert);
+    gl.attachShader(program, frag);
+    gl.linkProgram(program);
+    gl.useProgram(program);
+  
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.drawArrays(gl.POINTS, 0, 1);
+  
+    gl.flush();
+    gl.endFrameEXP();
+  }
